@@ -10,3 +10,4 @@ __pycache__/
 # Dati personali/temporanei
 *.log
 .DS_Store
+/data
