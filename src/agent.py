@@ -50,7 +50,7 @@ def load_data(file_path: str) -> pd.DataFrame:
                 )
 
                 # PRE-PROCESSING: Sostituiamo direttamente qui i NaN con 0!
-                df[ape_col_name] = df[ape_col_name].fillna(0)
+                # df[ape_col_name] = df[ape_col_name].fillna(0)
 
                 print(f"[+] Calcolata colonna '{ape_col_name}' confrontando {dcr_col} e {srld_col}")
 
@@ -62,6 +62,12 @@ def load_data(file_path: str) -> pd.DataFrame:
 
 def build_pandas_agent(df: pd.DataFrame):
     """Creates and return the agent with LangChain linked to Ollama and the DataFrame."""
+
+    # Disabilita il troncamento delle righe e colonne in Pandas
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.width', 1000)
+
     # 1. Inizializza il modello locale tramite Ollama
     llm = OllamaLLM(model=OLLAMA_MODEL)
 
@@ -77,6 +83,12 @@ def build_pandas_agent(df: pd.DataFrame):
                                     4.1. Esempio: 'Il MAPE della unique audience è del 12.3%'
                                     5. Quando hai ottenuto il risultato del calcolo numerico, formula subito la risposta finale, con una frase che lo includa in modo naturale.
                                     6. Non speculare troppo sui dati, se non sei sicuro di qualcosa chiedi spiegazioni.
+                                    7. Quando fai raggruppamenti complessi (es. groupby con più colonne), assicurati di analizzare TUTTE le righe restituite dal comando Python prima di scrivere la risposta finale.
+
+                                    REGOLE PER I REPORT E SALVATAGGI:
+                                    - Se l'utente ti chiede di salvare, esportare o creare un report (CSV o Excel), usa i comandi Pandas come .to_csv() o .to_excel().
+                                    - Salva SEMPRE i file generati dentro la cartella 'data/' (es. 'data/report_mape.csv').
+                                    - Avvisa l'utente nella risposta finale quando il file è stato creato con successo.
                                     """
 
     # 2. Istanzia l'agente per l'analisi del DataFrame
