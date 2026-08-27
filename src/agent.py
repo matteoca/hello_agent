@@ -48,6 +48,10 @@ def load_data(file_path: str) -> pd.DataFrame:
                     np.abs((df[dcr_col] - df[srld_col]) / df[dcr_col]) * 100, 
                     np.nan # Mettiamo NaN (Not a Number) così Pandas non lo conta nella media (MAPE)
                 )
+
+                # PRE-PROCESSING: Sostituiamo direttamente qui i NaN con 0!
+                df[ape_col_name] = df[ape_col_name].fillna(0)
+
                 print(f"[+] Calcolata colonna '{ape_col_name}' confrontando {dcr_col} e {srld_col}")
 
         return df
@@ -62,27 +66,18 @@ def build_pandas_agent(df: pd.DataFrame):
     llm = OllamaLLM(model=OLLAMA_MODEL)
 
     # --- REGOLE NEL PROMPT ---
-    custom_prefix = """
-                    Sei un Data Analyst esperto. Il tuo compito è analizzare il DataFrame 'df'.
-                    
-                    ATTENZIONE - REGOLE DI FORMATTAZIONE RIGIDE (DEVI RISPETTARLE O IL SISTEMA CRASHERA'):
-                    Devi rispondere ESATTAMENTE in questo formato passo-passo. 
-                    VIETATO usare parentesi quadre per il nome dell'azione.
-                    VIETATO usare blocchi di codice markdown (```python) per l'Action Input.
-
-                    Question: la domanda dell'utente
-                    Thought: il tuo ragionamento su cosa fare
-                    Action: python_repl_ast
-                    Action Input: df['ape_ua'].mean()
-                    Observation: il risultato del comando
-                    Thought: Ora conosco la risposta
-                    Final Answer: La risposta finale in italiano.
-                    
-                    REGOLE SUI DATI:
-                    1. L'Errore Percentuale Assoluto (APE) è GIA' CALCOLATO nelle colonne 'ape_ua', 'ape_pv', 'ape_ts'.
-                    2. Il MAPE è semplicemente la media dell'APE. Esempio per 'ua': df['ape_ua'].mean()
-                    3. Ignora le operazioni non richieste e NON inventare nuove metriche.
-                    """
+    custom_prefix = custom_prefix = """
+                                    Sei un Data Analyst esperto. Rispondi alle domande dell'utente analizzando il DataFrame 'df'.
+                                    
+                                    REGOLE SUI DATI:
+                                    1. L'Errore Percentuale Assoluto (APE) è già stato calcolato nelle colonne 'ape_ua', 'ape_pv', 'ape_ts'.
+                                    2. Il MAPE (Mean Absolute Percentage Error) è la media semplice dell'APE. Ad esempio, per la 'unique audience' (ua) devi eseguire: df['ape_ua'].mean()
+                                    3. Rispondi sempre in italiano, in modo chiaro e preciso.
+                                    4. Non appena hai ottenuto un risultato numerico, rispondi.
+                                    4.1. Esempio: 'Il MAPE della unique audience è del 12.3%'
+                                    5. Quando hai ottenuto il risultato del calcolo numerico, formula subito la risposta finale, con una frase che lo includa in modo naturale.
+                                    6. Non speculare troppo sui dati, se non sei sicuro di qualcosa chiedi spiegazioni.
+                                    """
 
     # 2. Istanzia l'agente per l'analisi del DataFrame
     agent = create_pandas_dataframe_agent(
@@ -90,6 +85,7 @@ def build_pandas_agent(df: pd.DataFrame):
         df=df,
         handle_parsing_errors=True,
         prefix=custom_prefix,
+        max_iterations=3,            # <--- BLOCCO LOOP: si ferma se non risponde in 3 passaggi
         verbose=True,                # Mostra la catena di ragionamento (CoT) nel terminale
         allow_dangerous_code=True    # Permette all'agente di eseguire codice Python generato
     )

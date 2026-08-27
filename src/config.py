@@ -2,7 +2,16 @@ import os
 import glob
 
 # Modello Ollama da utilizzare (assicurati che sia tra quelli di 'ollama list')
-OLLAMA_MODEL = "phi3:latest" # Oppure "llama3.2:3b-instruct-q4_0"
+# list of models
+## qwen2.5:14b                  7cdf5a0187d5    9.0 GB
+## llama3.1:latest              46e0c10c039e    4.9 GB
+## llama3.2:3b-instruct-q4_0    9b9453afbdd6    1.9 GB
+## gemma:2b                     b50d6c999e59    1.7 GB
+## llama3.2:3b                  a80c4f17acd5    2.0 GB
+## llama3.2:1b                  baf6a787fdff    1.3 GB
+## tinyllama:latest             2644915ede35    637 MB
+## phi3:latest                  4f2222927938    2.2 GB
+OLLAMA_MODEL = "qwen2.5:14b"
 
 # Percorso relativo del file dati
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
