@@ -63,20 +63,32 @@ def build_pandas_agent(df: pd.DataFrame):
 
     # --- REGOLE NEL PROMPT ---
     custom_prefix = """
-    Sei un Data Analyst esperto. Il tuo compito è analizzare il DataFrame fornito.
-    
-    REGOLE IMPORTANTI PER LE METRICHE:
-    1. L'Errore Percentuale Assoluto (APE) per le varie metriche ('ua', 'pv', 'ts') è GIA' STATO CALCOLATO ed è presente nelle colonne che iniziano per 'ape_' (es. 'ape_ua', 'ape_pv').
-    2. Se l'utente ti chiede di calcolare il MAPE (Mean Absolute Percentage Error) di una metrica, devi semplicemente calcolare la MEDIA (mean) della colonna 'ape_' corrispondente, ignorando i valori nulli (NaN).
-    3. Formula mentale per il MAPE di 'ua': df['ape_ua'].mean()
-    4. Rispondi sempre in italiano, in modo chiaro e riportando i valori numerici arrotondati a due decimali (es. 15.42%).
-    5. Se non sei sicuro di un risultato o di una risposta, non rispondere, ma chiedi ulteriori chiarimenti.
-    """
+                    Sei un Data Analyst esperto. Il tuo compito è analizzare il DataFrame 'df'.
+                    
+                    ATTENZIONE - REGOLE DI FORMATTAZIONE RIGIDE (DEVI RISPETTARLE O IL SISTEMA CRASHERA'):
+                    Devi rispondere ESATTAMENTE in questo formato passo-passo. 
+                    VIETATO usare parentesi quadre per il nome dell'azione.
+                    VIETATO usare blocchi di codice markdown (```python) per l'Action Input.
+
+                    Question: la domanda dell'utente
+                    Thought: il tuo ragionamento su cosa fare
+                    Action: python_repl_ast
+                    Action Input: df['ape_ua'].mean()
+                    Observation: il risultato del comando
+                    Thought: Ora conosco la risposta
+                    Final Answer: La risposta finale in italiano.
+                    
+                    REGOLE SUI DATI:
+                    1. L'Errore Percentuale Assoluto (APE) è GIA' CALCOLATO nelle colonne 'ape_ua', 'ape_pv', 'ape_ts'.
+                    2. Il MAPE è semplicemente la media dell'APE. Esempio per 'ua': df['ape_ua'].mean()
+                    3. Ignora le operazioni non richieste e NON inventare nuove metriche.
+                    """
 
     # 2. Istanzia l'agente per l'analisi del DataFrame
     agent = create_pandas_dataframe_agent(
         llm=llm,
         df=df,
+        handle_parsing_errors=True,
         prefix=custom_prefix,
         verbose=True,                # Mostra la catena di ragionamento (CoT) nel terminale
         allow_dangerous_code=True    # Permette all'agente di eseguire codice Python generato
