@@ -23,3 +23,8 @@ activate.bat
 
 ### install packages
 pip install -r requirements.txt
+
+
+### domanda test
+L'agente e' specializzato nell'analisi dei risutlati dell'algoritmo srld:
+" Calcola il mape per la unique audience raggruppando per aggregation, platform, content e topbrand, filtrando demo per 'all'. Escludi i brand id 1 e 2. NON stampare i risultati a schermo, ma salva direttamente l'intero dataframe in un file CSV chiamato 'risultati_completi.csv' nella cartella data/outputs (se non esiste, creala)."
