@@ -13,8 +13,12 @@ def load_data(file_path: str) -> pd.DataFrame:
             df = pd.read_csv(file_path)
         elif ext in ['.xlsx', '.xls']:
             df = pd.read_excel(file_path)
+        elif ext == '.json':
+            df = pd.read_json(file_path)
+        elif ext == '.parquet':
+            df = pd.read_parquet(file_path)
         else:
-            raise ValueError(f"Estensione '{ext}' non supportata.")
+            raise ValueError(f"Estensione '{ext}' non supportata dall'Agente Pandas.")
         
         print(f"[+] Dati caricati con successo da: {os.path.basename(file_path)} ({len(df)} righe)")
 
